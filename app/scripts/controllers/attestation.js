@@ -173,10 +173,12 @@ function AttestationCtrl($scope, api) {
     this.teacherName = teacherName;
   }
 
-  $scope.getDisciplineName = function(name) {
+  $scope.getDisciplineName = getDisciplineName;
+
+  function getDisciplineName(name) {
     var result = name.split(',');
     return result[0];
-  };
+  }
 
   function getStudentsAndDisciplinesLists(response) {
     var allDisciplinesList = [];
@@ -293,16 +295,6 @@ function AttestationCtrl($scope, api) {
       group1.localeCompare(group2) || student1.localeCompare(student2)
     );
   }
-
-  // sort response in this order:
-  // 1 - by disciplines name
-  function sortStudentsResults(a, b) {
-    var name1 = a.rnpRow.name;
-    var name2 = b.rnpRow.name;
-
-    return name1.localeCompare(name2);
-  }
-
   function generateUrlForAttestPeriod(year, semester, attestNum) {
     return (
       'Attestation/period?dcStudingYearId=' + year +
@@ -454,16 +446,35 @@ function AttestationCtrl($scope, api) {
     }
   };
 
+  function transformAttestationArray(array) {
+    var result = [];
+    var obj = {};
+
+    array.forEach(function(item) {
+      obj = {
+        attestation: item.attestation.name,
+        lecturer: item.lecturer.name,
+        disciplineName: getDisciplineName(item.rnpRow.name)
+      };
+      result.push(obj);
+    });
+
+    return result;
+  }
+
   $scope.loadStudentsResult = function(sPersonalityId, cAttestationPeriodId) {
     initStudentsResult();
     var url = (
       'Attestation/student/' + sPersonalityId + '/period/' +
       cAttestationPeriodId + '/result'
     );
-    api.execute('GET', url)
+    var method = 'GET';
+    api.execute(method, url)
       .then(function(response) {
         $scope.getStudentsResult = true;
-        $scope.studentsResult = response.sort(sortStudentsResults);
+        $scope.attestationResults = transformAttestationArray(
+          response[0].attestations
+        );
       },
       function() {
         $scope.studentsResult = null;
@@ -479,4 +490,31 @@ function AttestationCtrl($scope, api) {
   loadSemesters();
   loadAttestations();
 
+  // sort data in table functions
+
+  // init value TODO add to global cntrl init function
+  $scope.sortOrderStudent = {
+    type: null,
+    sortReverse: null
+  };
+  function changeSortOrder(orderBy) {
+    orderBy.sortReverse = !orderBy.sortReverse;
+  }
+
+  function setSortOrderType(orderBy, newOrderType) {
+    orderBy.type = newOrderType;
+    changeSortOrder(orderBy);
+  }
+
+  function isAscendingSort(orderBy, orderType) {
+    return orderBy.type === orderType && orderBy.sortReverse;
+  }
+
+  function isDescendingSort(orderBy, orderType) {
+    return orderBy.type === orderType && !orderBy.sortReverse;
+  }
+
+  $scope.setSortOrderType = setSortOrderType;
+  $scope.isAscendingSort = isAscendingSort;
+  $scope.isDescendingSort = isDescendingSort;
 }
