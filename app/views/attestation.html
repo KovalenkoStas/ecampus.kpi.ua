@@ -178,7 +178,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr ng-repeat="item in attestationResults | orderBy:sortOrderStudent.type:sortOrderStudent.sortReverse">
+                <tr ng-repeat="item in attestationResults | orderObjectBy:sortOrderStudent.type:sortOrderStudent.sortReverse">
                   <td class="text-center">{{$index + 1}}</td>
                   <td class="text-center">{{item.disciplineName}}</td>
                   <td class="text-center">{{item.lecturer}}</td>
