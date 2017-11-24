@@ -167,7 +167,7 @@ function configRoutes($routeProvider, $locationProvider) {
       templateUrl: 'views/npSpecializations.html',
       controller: 'NpSpecializationsCtrl',
       controllerAs: 'NpSpec'
-    })    
+    })
     .when('/catalogue-credit-module', {
       templateUrl: 'views/creditModules.html',
       controller: 'CreditModulesCtrl',
@@ -200,3 +200,4 @@ function checkSessionTime($rootScope, api) {
 
   $rootScope.$on('$destroy', deregister);
 }
+// TODO add $alertProvider

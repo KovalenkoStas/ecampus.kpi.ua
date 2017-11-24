@@ -275,24 +275,19 @@ function AttestationCtrl($scope, api) {
   }
 
   // sort response in this order:
-  // 1 - by course 2 - by discipline name
-  // 3 - by study group name 4 - by student name
+  // 1 - by course 2 - by study group name
+  // 3 - by discipline name
   function sortRuleForLecturersResult(a, b) {
     var course1 = +(a.course);
     var course2 = +(b.course);
-
+    var group1 = a.studyGroup.name;
+    var group2 = b.studyGroup.name;
     var disc1 = a.rnpRow.name;
     var disc2 = b.rnpRow.name;
 
-    var group1 = a.studyGroup.name;
-    var group2 = b.studyGroup.name;
-
-    var student1 = a.student.name;
-    var student2 = b.student.name;
-
     return (
-      course1 - course2 || disc1.localeCompare(disc2) ||
-      group1.localeCompare(group2) || student1.localeCompare(student2)
+      course1 - course2 || group1.localeCompare(group2) ||
+      disc1.localeCompare(disc2)
     );
   }
   function generateUrlForAttestPeriod(year, semester, attestNum) {
@@ -405,11 +400,13 @@ function AttestationCtrl($scope, api) {
     );
     api.execute('GET', url)
       .then(function(response) {
+        console.log('loadLecturersResult');
         var sortedResponse = response.sort(sortRuleForLecturersResult);
-        getGroupsList(sortedResponse);
-        getCoursesList(sortedResponse);
-        getDisciplinesList(sortedResponse);
-        $scope.errorLecturersResult = '';
+        console.log(sortedResponse);
+        // getGroupsList(sortedResponse);
+        // getCoursesList(sortedResponse);
+        // getDisciplinesList(sortedResponse);
+        // $scope.errorLecturersResult = '';
         $scope.getLecturersResults = true;
         $scope.lecturersResult = sortedResponse;
       },
