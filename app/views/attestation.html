@@ -273,84 +273,53 @@
           </div>
         </div>
         <div class="tab-pane" ng-class="{active: isSet(3)}">
-          <div class="col-lg-6 col-lg-offset-3 col-md-6 col-md-offset-3 col-sm-6 col-sm-offset-3 lecturers-select">
-            <label for="lecturers-select" class="select-form__label">Прізвище Ім'я По-батькові викладача</label>
-            <ui-select id="lecturers-select" ng-keyup="loadLecturers($select.search);"
-                       class="select-form__select_attest"
-                       ng-model="$parent.itemLecturers" append-to-body="true">
-              <ui-select-match placeholder="Введіть ПІБ викладача">
-                <span ng-bind="$select.selected.fullName"></span>
-              </ui-select-match>
-              <ui-select-choices repeat="lecturer in (lecturersList | filter: $select.search) track by lecturer.id"
-                                 position="down">
-                <span ng-bind="lecturer.fullName"></span>
-                <span class="lecturer-subdivision-name" ng-bind="lecturer.subdivisionName"></span>
-              </ui-select-choices>
-              <ui-select-no-choice>
-                Викладача з таким ПІБ не знайдено
-              </ui-select-no-choice>
-            </ui-select>
-            <div class="error-load-attest" ng-show="errorMessageLecturers">{{errorMessageLecturers}}</div>
-            <div class="text-center">
-              <button class="btn btn-primary btn-result" type="submit" ng-show="itemLecturers"
-                      ng-click="loadLecturersResult(itemLecturers.id, attestationPeriodId);">Переглянути результати
-              </button>
-            </div>
-            <div class="alert alert-info text-center fade in attest-alert"
-                 ng-show="getLecturersResults && lecturersResult.length === 0">
-              Немає даних про атестацію для вказаного викладача!
+          <div class="col-lg-6 col-lg-offset-3 col-md-6 col-md-offset-3 col-sm-6 col-sm-offset-3">
+            <div class="lecturers-select">
+              <label for="lecturers-select" class="select-form__label">Прізвище Ім'я По-батькові викладача</label>
+              <ui-select id="lecturers-select" ng-keyup="loadLecturers($select.search);"
+                         class="select-form__select_attest"
+                         ng-model="$parent.itemLecturers" append-to-body="true">
+                <ui-select-match placeholder="Введіть ПІБ викладача">
+                  <span ng-bind="$select.selected.fullName"></span>
+                </ui-select-match>
+                <ui-select-choices repeat="lecturer in (lecturersList | filter: $select.search) track by lecturer.id"
+                                   position="down">
+                  <span ng-bind="lecturer.fullName"></span>
+                  <span class="lecturer-subdivision-name" ng-bind="lecturer.subdivisionName"></span>
+                </ui-select-choices>
+                <ui-select-no-choice>
+                  Викладача з таким ПІБ не знайдено
+                </ui-select-no-choice>
+              </ui-select>
+              <div class="error-load-attest" ng-show="errorMessageLecturers">{{errorMessageLecturers}}</div>
+              <div class="text-center">
+                <button class="btn btn-primary btn-result" type="submit" ng-show="itemLecturers"
+                        ng-click="loadLecturersResult(itemLecturers.id, attestationPeriodId);">Переглянути результати
+                </button>
+              </div>
+              <div class="alert alert-info text-center fade in attest-alert"
+                   ng-show="getLecturersResults && lecturersResult.length === 0">
+                Немає даних про атестацію для вказаного викладача!
+              </div>
             </div>
             <div ng-show="getLecturersResults">
-              <div class="course-select">
-                <label for="course" class="select-form__label">Курс</label>
-                <ui-select id="course" class="select-form__select_attest" ng-model="$parent.itemCourse"
-                           append-to-body="true">
-                  <ui-select-match placeholder="Оберіть курс">
-                    <span ng-bind="$select.selected"></span>
+              <div class="lecturers-results">
+                <label for="lecturers-results" class="select-form__label">Оберіть результати</label>
+                <ui-select id="lecturers-results" class="select-form__select_attest"
+                           ng-model="$parent.lecturerResult" append-to-body="true">
+                  <ui-select-match placeholder="Оберіть курс, групу, предмет">
+                    <span ng-bind="createStringForSelect($select.selected)"></span>
                   </ui-select-match>
-                  <ui-select-choices repeat="course in (coursesListForLecturers | filter: $select.search)"
+                  <ui-select-choices repeat="item in (lecturersResult | filter: $select.search) track by $index"
                                      position="down">
-                    <span ng-bind="course"></span>
+                    <span ng-bind="createStringForSelect(item)"></span>
                   </ui-select-choices>
                   <ui-select-no-choice>
-                    Курс не знайдено
+                    Результатів не знайдено
                   </ui-select-no-choice>
                 </ui-select>
               </div>
-              <div class="discipline-select">
-                <label for="discipline" class="select-form__label">Дисципліна</label>
-                <ui-select id="discipline" class="select-form__select_attest" ng-model="$parent.itemDiscipline"
-                           append-to-body="true">
-                  <ui-select-match placeholder="Оберіть дисципліну">
-                    <span ng-bind="$select.selected"></span>
-                  </ui-select-match>
-                  <ui-select-choices repeat="discipline in (disciplinesListForLecturers | filter: $select.search)"
-                                     position="down">
-                    <span ng-bind="discipline"></span>
-                  </ui-select-choices>
-                  <ui-select-no-choice>
-                    Дисципліну не знайдено
-                  </ui-select-no-choice>
-                </ui-select>
-              </div>
-              <div class="group-lect-select">
-                <label for="group-lect" class="select-form__label">Група</label>
-                <ui-select id="group-lect" class="select-form__select_attest" ng-model="$parent.itemGroupLect"
-                           append-to-body="true">
-                  <ui-select-match placeholder="Оберіть групу">
-                    <span ng-bind="$select.selected"></span>
-                  </ui-select-match>
-                  <ui-select-choices repeat="group in (groupsListForLecturers | filter: $select.search)"
-                                     position="down">
-                    <span ng-bind="group"></span>
-                  </ui-select-choices>
-                  <ui-select-no-choice>
-                    Групу не знайдено
-                  </ui-select-no-choice>
-                </ui-select>
-              </div>
-
-              <div ng-show="itemGroupLect && lecturersResult.length !== 0" class="table-responsive">
+              <div ng-show="lecturerResult && lecturerResult.attestations.length !== 0" class="table-responsive">
                 <table class="table table-hover table-condensed table-bordered" id="table-attest-lecturer">
                   <thead class="hidden for-excel">
                   <tr>
@@ -373,24 +342,37 @@
                   <thead>
                   <tr>
                     <th class="text-center">№</th>
-                    <th class="text-center">ПІБ</th>
-                    <th class="text-center">Результат</th>
+                    <th class="text-center">
+                      <a ng-click="setSortOrderType(sortOrderLecturer, 'studentName')"
+                         style="text-decoration: none;">
+                        ПІБ
+                        <span class="fa fa-caret-down" ng-show="isDescendingSort(sortOrderLecturer, 'studentName')"></span>
+                        <span class="fa fa-caret-up" ng-show="isAscendingSort(sortOrderLecturer, 'studentName')"></span>
+                      </a>
+                    </th>
+                    <th class="text-center">
+                      <a ng-click="setSortOrderType(sortOrderLecturer, 'attestationName')"
+                         style="text-decoration: none;">
+                        Результат
+                        <span class="fa fa-caret-down" ng-show="isDescendingSort(sortOrderLecturer, 'attestationName')"></span>
+                        <span class="fa fa-caret-up" ng-show="isAscendingSort(sortOrderLecturer, 'attestationName')"></span>
+                      </a>
+                    </th>
                   </tr>
                   </thead>
                   <tbody>
-                  <tr
-                    ng-repeat="stud in lecturersResult | filter:itemCourse | filter:itemDiscipline | filter:itemGroupLect">
+                  <tr ng-repeat="stud in lecturerResult.attestations | orderObjectBy:sortOrderLecturer.type:sortOrderLecturer.sortReverse">
                     <td class="text-center">{{$index + 1}}</td>
-                    <td>{{stud.student.name}}</td>
-                    <td class="text-center">{{stud.attestation.name}}</td>
+                    <td>{{stud.studentName}}</td>
+                    <td class="text-center">{{stud.attestationName}}</td>
                   </tr>
                   </tbody>
                 </table>
               </div>
-              <div class="text-center" ng-show="lecturersResult.length !== 0">
+              <div class="text-center" ng-show="lecturerResult.attestations.length !== 0">
                 <a class="btn btn-success" download="attest.xls"
                    onclick="return ExcellentExport.excel(this, 'table-attest-lecturer', 'attest');">
-                  <i class="fa fa-file-excel-o "></i> Завантажити звіт
+                  <i class="fa fa-file-excel-o "></i>Завантажити звіт
                 </a>
               </div>
             </div>

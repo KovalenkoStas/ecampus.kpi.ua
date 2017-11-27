@@ -200,54 +200,23 @@ function AttestationCtrl($scope, api) {
     $scope.studentsList = uniqueElements(allStudentsList);
   }
 
-  function getGroupsList(response) {
-    var allGroupsList = [];
-
-    for (var i = 0; i < response.length; i++) {
-      allGroupsList.push(response[i].studyGroup.name);
-    }
-
-    $scope.groupsListForLecturers = uniqueElements(allGroupsList);
-  }
-
-  function getCoursesList(response) {
-    var allCoursesList = [];
-
-    for (var i = 0; i < response.length; i++) {
-      allCoursesList.push(response[i].course);
-    }
-
-    $scope.coursesListForLecturers = uniqueElements(allCoursesList);
-  }
-
-  function getDisciplinesList(response) {
-    var allDisciplinesList = [];
-
-    for (var i = 0; i < response.length; i++) {
-      var result = response[i].rnpRow.name.split(',');
-      allDisciplinesList.push(result[0]);
-    }
-
-    $scope.disciplinesListForLecturers = uniqueElements(allDisciplinesList);
-  }
-
   function uniqueLoadGroupsResultElements(arr) {
     var result = [];
 
     nextInput:
-      for (var i = 0; i < arr.length; i++) {
-        var str = arr[i];
-        for (var j = 0; j < result.length; j++) {
-          if (
-            (result[j].disciplineFullName === str.disciplineFullName) &&
-            (result[j].teacherName === str.teacherName) &&
-            (result[j].disciplineShortName === str.disciplineShortName)
-          ) {
-            continue nextInput;
-          }
+    for (var i = 0; i < arr.length; i++) {
+      var str = arr[i];
+      for (var j = 0; j < result.length; j++) {
+        if (
+          (result[j].disciplineFullName === str.disciplineFullName) &&
+          (result[j].teacherName === str.teacherName) &&
+          (result[j].disciplineShortName === str.disciplineShortName)
+        ) {
+          continue nextInput;
         }
-        result.push(str);
       }
+      result.push(str);
+    }
     return result;
   }
 
@@ -392,6 +361,64 @@ function AttestationCtrl($scope, api) {
     }
   };
 
+  $scope.createStringForSelect = createStringForSelect;
+
+  function createStringForSelect(obj) {
+    var COURSE = 'курс';
+    var GROUP = 'група';
+    var SPACE = ' ';
+    var DASH = ' - ';
+    if (obj) {
+      return (obj.course.toString() + SPACE +
+        COURSE + DASH +
+        SPACE + GROUP + SPACE +
+        obj.studyGroup + DASH +
+        obj.disciplineName
+      );
+    }
+  }
+
+  function sortRuleAttestationsLectRes(a, b) {
+    var name1 = a.studentName;
+    var name2 = b.studentName;
+
+    return name1.localeCompare(name2);
+  }
+
+  function transformAttestationsForLecturerResults(array) {
+    var result = [];
+    var obj = {};
+
+    array.forEach(function(item) {
+      obj = {
+        studentName: item.student.name,
+        attestationName: item.attestation.name
+      };
+      result.push(obj);
+    });
+
+    return result.sort(sortRuleAttestationsLectRes);
+  }
+
+  function transformLecturersAttestations(array) {
+    var result = [];
+    var obj = {};
+
+    array.forEach(function(item) {
+      obj = {
+        course: item.course,
+        studyGroup: item.studyGroup.name,
+        disciplineName: getDisciplineName(item.rnpRow.name),
+        attestations: transformAttestationsForLecturerResults(
+          item.attestations
+        )
+      };
+      result.push(obj);
+    });
+
+    return result;
+  }
+
   $scope.loadLecturersResult = function(eEmployees1Id, cAttestationPeriodId) {
     initLecturersResult();
     var url = (
@@ -403,12 +430,11 @@ function AttestationCtrl($scope, api) {
         console.log('loadLecturersResult');
         var sortedResponse = response.sort(sortRuleForLecturersResult);
         console.log(sortedResponse);
-        // getGroupsList(sortedResponse);
-        // getCoursesList(sortedResponse);
-        // getDisciplinesList(sortedResponse);
-        // $scope.errorLecturersResult = '';
+        $scope.errorLecturersResult = '';
         $scope.getLecturersResults = true;
-        $scope.lecturersResult = sortedResponse;
+        $scope.lecturersResult = transformLecturersAttestations(sortedResponse);
+        console.log(transformLecturersAttestations);
+        console.log($scope.lecturersResult);
       },
       function() {
         $scope.errorLecturersResult = (
@@ -443,7 +469,7 @@ function AttestationCtrl($scope, api) {
     }
   };
 
-  function transformAttestationArray(array) {
+  function transformStudentsAttestations(array) {
     var result = [];
     var obj = {};
 
@@ -469,7 +495,7 @@ function AttestationCtrl($scope, api) {
     api.execute(method, url)
       .then(function(response) {
         $scope.getStudentsResult = true;
-        $scope.attestationResults = transformAttestationArray(
+        $scope.attestationResults = transformStudentsAttestations(
           response[0].attestations
         );
       },
@@ -494,6 +520,12 @@ function AttestationCtrl($scope, api) {
     type: null,
     sortReverse: null
   };
+
+  $scope.sortOrderLecturer = {
+    type: null,
+    sortReverse: null
+  };
+
   function changeSortOrder(orderBy) {
     orderBy.sortReverse = !orderBy.sortReverse;
   }
