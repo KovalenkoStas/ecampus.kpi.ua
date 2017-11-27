@@ -38,6 +38,15 @@
       attest.groupsListForLecturers = [];
       attest.coursesListForLecturers = [];
       attest.disciplinesListForLecturers = [];
+      // table sort functionality
+      attest.sortOrderStudent = {
+        type: null,
+        sortReverse: null
+      };
+      attest.sortOrderLecturer = {
+        type: null,
+        sortReverse: null
+      };
 
       loadStudyYears();
       loadSemesters();
@@ -48,13 +57,16 @@
     attest.errorMessageLecturers = '';
     attest.errorMessageStudents = '';
 
-    attest.setPill = function(newPill) {
+    attest.setPill = setPill;
+    function setPill(newPill) {
       attest.pill = newPill;
-    };
+    }
 
-    attest.isSet = function(pillNum) {
+    attest.isSet = isSet;
+
+    function isSet(pillNum) {
       return attest.pill === pillNum;
-    };
+    }
 
     function setCurrentStudyYear(response) {
       for (var i = 0; i < response.length; i++) {
@@ -184,10 +196,10 @@
       return result[0];
     }
 
-    // sort response in this order:
-    // 1 - by course 2 - by study group name
-    // 3 - by discipline name
     function sortRuleForLecturersResult(a, b) {
+      // sort response in this order:
+      // 1 - by course 2 - by study group name
+      // 3 - by discipline name
       var course1 = +(a.course);
       var course2 = +(b.course);
       var group1 = a.studyGroup.name;
@@ -449,15 +461,6 @@
     // sort data in table functions
 
     // init value TODO add to global cntrl init function
-    attest.sortOrderStudent = {
-      type: null,
-      sortReverse: null
-    };
-
-    attest.sortOrderLecturer = {
-      type: null,
-      sortReverse: null
-    };
 
     function changeSortOrder(orderBy) {
       orderBy.sortReverse = !orderBy.sortReverse;
