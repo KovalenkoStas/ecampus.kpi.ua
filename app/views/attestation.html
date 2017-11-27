@@ -8,14 +8,14 @@
 
       <h1>Результати атестації</h1>
 
-      <div class="col-lg-6 col-lg-offset-3 col-md-6 col-md-offset-3 col-sm-6 col-sm-offset-3 selected-info">
-        <div class="year-select">
+      <div class="col-lg-6 col-lg-offset-3 col-md-6 col-md-offset-3 col-sm-6 col-sm-offset-3 attestation-params">
+        <div class="select-year">
           <label for="year" class="select-form__label">Навчальний рік</label>
-          <ui-select id="year" class="select-form__select_attest" ng-model="studyYears.selected" append-to-body="true">
+          <ui-select id="year" class="select-form__select_attest" ng-model="attest.studyYears.selected" append-to-body="true">
             <ui-select-match placeholder="Оберіть навчальний рік">
               <span ng-bind="$select.selected.name"></span>
             </ui-select-match>
-            <ui-select-choices repeat="itemYears in (studyYears | filter: $select.search) track by itemYears.id"
+            <ui-select-choices repeat="itemYears in (attest.studyYears | filter: $select.search) track by itemYears.id"
                                position="down">
               <span ng-bind="itemYears.name"></span>
             </ui-select-choices>
@@ -23,18 +23,19 @@
               Рік не знайдено
             </ui-select-no-choice>
           </ui-select>
-          <div class="error-load-attest" ng-show="errorMessageYears">{{errorMessageYears}}</div>
+          <div class="error-load-attest" ng-show="attest.errorMessageYears">
+            {{attest.errorMessageYears}}
+          </div>
         </div>
-        <div class="semester-select" ng-show="studyYears.selected">
+        <div class="select-semester" ng-if="attest.studyYears.selected">
           <label for="semester" class="select-form__label">Семестр</label>
-          <ui-select id="semester" class="select-form__select_attest" ng-model="studySemesters.selected"
+          <ui-select id="semester" class="select-form__select_attest" ng-model="attest.studySemesters.selected"
                      append-to-body="true">
             <ui-select-match placeholder="Оберіть семестр">
               <span ng-bind="$select.selected.name"></span>
             </ui-select-match>
-            <ui-select-choices
-              repeat="itemSemester in (studySemesters | filter: $select.search) track by itemSemester.id"
-              position="down">
+            <ui-select-choices repeat="itemSemester in (attest.studySemesters | filter: $select.search) track by itemSemester.id"
+                               position="down">
               <span ng-bind="itemSemester.name"></span>
             </ui-select-choices>
             <ui-select-no-choice>
@@ -42,15 +43,15 @@
             </ui-select-no-choice>
           </ui-select>
         </div>
-        <div class="attest-num-select" ng-show="studySemesters.selected">
-          <label for="attest-num" class="select-form__label">Номер атестації</label>
-          <ui-select id="attest-num" class="select-form__select_attest"
-                     ng-model="studyAttestationPeriod.selected"
+        <div class="select-attestation-period" ng-if="attest.studySemesters.selected">
+          <label for="attestation-period" class="select-form__label">Номер атестації</label>
+          <ui-select id="attestation-period" class="select-form__select_attest"
+                     ng-model="attest.studyAttestationPeriod.selected"
                      append-to-body="true">
             <ui-select-match placeholder="Оберіть номер атестації">
               <span ng-bind="$select.selected.name"></span>
             </ui-select-match>
-            <ui-select-choices repeat="attests in (studyAttestationPeriod | filter: $select.search) track by attests.id"
+            <ui-select-choices repeat="attests in (attest.studyAttestationPeriod | filter: $select.search) track by attests.id"
                                position="down">
               <span ng-bind="attests.name"></span>
             </ui-select-choices>
@@ -58,327 +59,321 @@
               Номер атестації не знайдений
             </ui-select-no-choice>
           </ui-select>
-          <div class="error-load-attest" ng-show="errorMessageAttests">{{errorMessageAttests}}</div>
+          <div class="error-load-attest" ng-show="attest.errorMessageAttests">
+            {{attest.errorMessageAttests}}
+          </div>
         </div>
 
-        <div class="text-center" ng-show="studyAttestationPeriod.selected">
+        <div class="text-center" ng-if="attest.studyAttestationPeriod.selected">
           <button class="btn btn-primary btn-result" type="submit"
-                  ng-click="clearAttestationPeriodId();
-                  getAttestationPeriodId(
-                    studyYears.selected.id,
-                    studySemesters.selected.id,
-                    studyAttestationPeriod.selected.id
-                  );">
+                  ng-click="attest.checkAttestationAvailability()">
             Перевірити наявність даних про атестацію
           </button>
         </div>
 
-        <div class="alert alert-danger text-center fade in attest-alert" ng-show="attestationPeriodId === null">
-          Немає даних про атестацію для таких параметрів!
+        <div class="alert alert-danger text-center fade in attest-alert" ng-if="attest.attestationPeriodId === -1">
+          {{ attest.errorAttestationPeriod }}
         </div>
 
-        <div class="attest-menu" ng-show="attestationPeriodId !== null && attestationPeriodId !== 'not get'">
+        <div class="attest-menu" ng-if="attest.attestationPeriodId !== null && attest.attestationPeriodId !== -1">
           <p class="text-center title-type-attest">Оберіть категорію для перегляду атестацій</p>
-          <ul class="nav nav-pills-attest nav-justified attest-navigation" ng-model="choiceType">
-            <li ng-class="{ active: isSet(1)}">
-              <a
-                ng-click="clearStudentsResult();setPill(1);clearGroupsResult();clearLecturersResult();">Студенти</a>
+          <ul class="nav nav-pills-attest nav-justified attest-navigation">
+            <li ng-class="{ active: attest.isSet(1)}">
+              <a ng-click="attest.setPill(1)">Студенти</a>
             </li>
-            <li ng-class="{ active: isSet(2)}">
-              <a
-                ng-click="clearGroupsResult();setPill(2);clearLecturersResult();clearStudentsResult();">Групи</a>
+            <li ng-class="{ active: attest.isSet(2)}">
+              <a ng-click="attest.setPill(2)">Групи</a>
             </li>
-            <li ng-class="{ active: isSet(3)}">
-              <a
-                ng-click="clearLecturersResult();setPill(3);clearGroupsResult();clearStudentsResult();">Викладачі</a>
+            <li ng-class="{ active: attest.isSet(3)}">
+              <a ng-click="attest.setPill(3)">Викладачі</a>
             </li>
           </ul>
         </div>
       </div>
 
     </div>
-    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+    <!--<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">-->
 
-      <div class="tab-content" ng-show="attestationPeriodId !== null && attestationPeriodId !== 'not get'">
-        <div class="tab-pane" ng-class="{active: isSet(1)}">
-          <div class="col-lg-6 col-lg-offset-3 col-md-6 col-md-offset-3 col-sm-6 col-sm-offset-3 student-select">
-            <label for="student-select" class="select-form__label">Прізвище Ім'я По-батькові студента</label>
-            <ui-select id="student-select" ng-keyup="loadStudents($select.search);" class="select-form__select_attest"
-                       ng-model="$parent.itemStudent" append-to-body="true">
-              <ui-select-match placeholder="Введіть ПІБ студента">
-                <span ng-bind="$select.selected.fullName"></span>
-              </ui-select-match>
-              <ui-select-choices repeat="student in (students | filter: $select.search) track by student.id"
-                                 position="down">
-                <span ng-bind="student.fullName"></span>
-                <span class="student-study-group-name" ng-bind="student.group"></span>
-              </ui-select-choices>
-              <ui-select-no-choice>
-                Студента з таким ПІБ не знайдено
-              </ui-select-no-choice>
-            </ui-select>
-            <div class="error-load-attest" ng-show="errorMessageStudents">{{errorMessageStudents}}</div>
-            <div class="text-center">
-              <button class="btn btn-primary btn-result" type="submit" ng-show="itemStudent"
-                      ng-click="loadStudentsResult(itemStudent.id, attestationPeriodId);">Переглянути результати
-              </button>
-            </div>
-            <div class="alert alert-info text-center fade in attest-alert"
-                 ng-show="getStudentsResult && attestationResults.length === 0">
-              Немає даних про атестацію для вказаного студента!
-            </div>
+      <!--<div class="tab-content" ng-show="attest.attestationPeriodId !== null && attest.attestationPeriodId !== 'not get'">-->
+        <!--<div class="tab-pane" ng-class="{active: attest.isSet(1)}">-->
+          <!--<div class="col-lg-6 col-lg-offset-3 col-md-6 col-md-offset-3 col-sm-6 col-sm-offset-3 student-select">-->
+            <!--<label for="student-select" class="select-form__label">Прізвище Ім'я По-батькові студента</label>-->
+            <!--<ui-select id="student-select" ng-keyup="attest.loadStudents($select.search);" class="select-form__select_attest"-->
+                       <!--ng-model="attest.itemStudent" append-to-body="true">-->
+              <!--<ui-select-match placeholder="Введіть ПІБ студента">-->
+                <!--<span ng-bind="$select.selected.fullName"></span>-->
+              <!--</ui-select-match>-->
+              <!--<ui-select-choices repeat="student in (attest.students | filter: $select.search) track by student.id"-->
+                                 <!--position="down">-->
+                <!--<span ng-bind="student.fullName"></span>-->
+                <!--<span class="student-study-group-name" ng-bind="student.group"></span>-->
+              <!--</ui-select-choices>-->
+              <!--<ui-select-no-choice>-->
+                <!--Студента з таким ПІБ не знайдено-->
+              <!--</ui-select-no-choice>-->
+            <!--</ui-select>-->
+            <!--<div class="error-load-attest" ng-show="attest.errorMessageStudents">{{attest.errorMessageStudents}}</div>-->
+            <!--<div class="text-center">-->
+              <!--<button class="btn btn-primary btn-result" type="submit" ng-show="attest.itemStudent"-->
+                      <!--ng-click="attest.loadStudentsResultattest(attest.itemStudent.id, attest.attestationPeriodId);">Переглянути результати-->
+              <!--</button>-->
+            <!--</div>-->
+            <!--<div class="alert alert-info text-center fade in attest-alert"-->
+                 <!--ng-show="attest.getStudentsResult && attest.attestationResults.length === 0">-->
+              <!--Немає даних про атестацію для вказаного студента!-->
+            <!--</div>-->
 
-            <div ng-show="getStudentsResult && attestationResults.length !== 0" class="table-responsive">
-              <table class="table table-hover table-condensed table-bordered" id="table-attest-for-student">
-                <thead class="hidden for-excel">
-                <tr>
-                  <th class="text-center">Навчальний рік</th>
-                  <th class="text-center">{{studyYears.selected.name}}</th>
-                </tr>
-                <tr>
-                  <th class="text-center">Семестр</th>
-                  <th class="text-center">{{studySemesters.selected.name}}</th>
-                </tr>
-                <tr>
-                  <th class="text-center">№ Атестації</th>
-                  <th class="text-center">{{studyAttestationPeriod.selected.name}}</th>
-                </tr>
-                <tr>
-                  <th class="text-center">Студент</th>
-                  <th class="text-center">{{itemStudent.fullName}}</th>
-                </tr>
-                </thead>
-                <thead>
-                <tr>
-                  <th class="text-center">№</th>
-                  <th class="text-center">
-                    <a ng-click="setSortOrderType(sortOrderStudent, 'disciplineName')"
-                       style="text-decoration: none;">
-                      Назва предмету
-                      <span class="fa fa-caret-down" ng-show="isDescendingSort(sortOrderStudent, 'disciplineName')"></span>
-                      <span class="fa fa-caret-up" ng-show="isAscendingSort(sortOrderStudent, 'disciplineName')"></span>
-                    </a>
-                  </th>
-                  <th class="text-center">
-                    <a ng-click="setSortOrderType(sortOrderStudent, 'lecturer')"
-                       style="text-decoration: none;">
-                      Результат атестації
-                      <span class="fa fa-caret-down" ng-show="isDescendingSort(sortOrderStudent, 'lecturer')"></span>
-                      <span class="fa fa-caret-up" ng-show="isAscendingSort(sortOrderStudent, 'lecturer')"></span>
-                    </a>
-                  </th>
-                  <th class="text-center">
-                    <a ng-click="setSortOrderType(sortOrderStudent, 'attestation')"
-                       style="text-decoration: none;">
-                      ПІБ викладача
-                      <span class="fa fa-caret-down" ng-show="isDescendingSort(sortOrderStudent, 'attestation')"></span>
-                      <span class="fa fa-caret-up" ng-show="isAscendingSort(sortOrderStudent, 'attestation')"></span>
-                    </a>
-                  </th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr ng-repeat="item in attestationResults | orderObjectBy:sortOrderStudent.type:sortOrderStudent.sortReverse">
-                  <td class="text-center">{{$index + 1}}</td>
-                  <td class="text-center">{{item.disciplineName}}</td>
-                  <td class="text-center">{{item.lecturer}}</td>
-                  <td class="text-center">{{item.attestation}}</td>
-                </tr>
-                </tbody>
-              </table>
-            </div>
-            <div class="text-center" ng-show="attestationResults.length !== 0">
-              <a class="btn btn-success" download="attest.xls"
-                 onclick="return ExcellentExport.excel(this, 'table-attest-for-student', 'attest');">
-                <i class="fa fa-file-excel-o "></i> Завантажити звіт
-              </a>
-            </div>
-          </div>
-        </div>
-        <div class="tab-pane" ng-class="{active: isSet(2)}">
-          <div class="col-lg-6 col-lg-offset-3 col-md-6 col-md-offset-3 col-sm-6 col-sm-offset-3 group-select">
-            <label for="group-select" class="select-form__label">Навчальна група</label>
-            <ui-select id="group-select" ng-keyup="loadGroups($select.search, studyYears.selected.id);"
-                       class="select-form__select_attest"
-                       ng-model="$parent.itemGroup" append-to-body="true">
-              <ui-select-match placeholder="Введіть ім'я групи">
-                <span ng-bind="$select.selected.name"></span>
-              </ui-select-match>
-              <ui-select-choices repeat="groups in (Groups | filter: $select.search) track by groups.id"
-                                 position="down">
-                <span ng-bind="groups.name"></span>
-              </ui-select-choices>
-              <ui-select-no-choice>
-                Група не знайдена
-              </ui-select-no-choice>
-            </ui-select>
-            <div class="error-load-attest" ng-show="errorMessageGroups">{{errorMessageGroups}}</div>
-            <div class="text-center">
-              <button class="btn btn-primary btn-result" type="submit" ng-show="itemGroup"
-                      ng-click="loadGroupsResult(itemGroup.id, attestationPeriodId);">Переглянути результати
-              </button>
-            </div>
-            <div class="alert alert-info text-center fade in attest-alert"
-                 ng-show="getGroupsResults && groupsResult.length === 0">
-              Немає даних про атестацію для вказаної групи!
-            </div>
-          </div>
-          <div class="col-md-12">
-            <div ng-show="getGroupsResults && groupsResult.length !== 0" class="table-responsive">
-              <table class="table table-hover table-condensed table-bordered" id="table-attest-group">
-                <thead class="hidden for-excel">
-                <tr>
-                  <th class="text-center">Навчальний рік</th>
-                  <th class="text-center">{{studyYears.selected.name}}</th>
-                </tr>
-                <tr>
-                  <th class="text-center">Семестр</th>
-                  <th class="text-center">{{studySemesters.selected.name}}</th>
-                </tr>
-                <tr>
-                  <th class="text-center">№ Атестації</th>
-                  <th class="text-center">{{studyAttestationPeriod.selected.name}}</th>
-                </tr>
-                <tr>
-                  <th class="text-center">Група</th>
-                  <th class="text-center">{{itemGroup.name}}</th>
-                </tr>
-                </thead>
-                <thead>
-                <tr>
-                  <th class="text-center">№</th>
-                  <th class="text-center">ПІБ</th>
-                  <th class="text-center" ng-repeat="disc in disciplinesListForGroups">
-                    "{{getDisciplineName(disc.disciplineFullName)}}"
-                    <br>
-                    {{disc.teacherName}}
-                  </th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr ng-repeat="stud in studentsList">
-                  <td class="text-center">{{$index + 1}}</td>
-                  <td>{{stud}}</td>
-                  <td class="text-center" ng-repeat="att in (groupsResult | filter: stud)">{{att.attestation.name}}</td>
-                </tr>
-                </tbody>
-              </table>
-            </div>
-            <div class="text-center" ng-show="groupsResult.length !== 0">
-              <a class="btn btn-success" download="attest.xls"
-                 onclick="return ExcellentExport.excel(this, 'table-attest-group', 'attest');">
-                <i class="fa fa-file-excel-o "></i> Завантажити звіт
-              </a>
-            </div>
-          </div>
-        </div>
-        <div class="tab-pane" ng-class="{active: isSet(3)}">
-          <div class="col-lg-6 col-lg-offset-3 col-md-6 col-md-offset-3 col-sm-6 col-sm-offset-3">
-            <div class="lecturers-select">
-              <label for="lecturers-select" class="select-form__label">Прізвище Ім'я По-батькові викладача</label>
-              <ui-select id="lecturers-select" ng-keyup="loadLecturers($select.search);"
-                         class="select-form__select_attest"
-                         ng-model="$parent.itemLecturers" append-to-body="true">
-                <ui-select-match placeholder="Введіть ПІБ викладача">
-                  <span ng-bind="$select.selected.fullName"></span>
-                </ui-select-match>
-                <ui-select-choices repeat="lecturer in (lecturersList | filter: $select.search) track by lecturer.id"
-                                   position="down">
-                  <span ng-bind="lecturer.fullName"></span>
-                  <span class="lecturer-subdivision-name" ng-bind="lecturer.subdivisionName"></span>
-                </ui-select-choices>
-                <ui-select-no-choice>
-                  Викладача з таким ПІБ не знайдено
-                </ui-select-no-choice>
-              </ui-select>
-              <div class="error-load-attest" ng-show="errorMessageLecturers">{{errorMessageLecturers}}</div>
-              <div class="text-center">
-                <button class="btn btn-primary btn-result" type="submit" ng-show="itemLecturers"
-                        ng-click="loadLecturersResult(itemLecturers.id, attestationPeriodId);">Переглянути результати
-                </button>
-              </div>
-              <div class="alert alert-info text-center fade in attest-alert"
-                   ng-show="getLecturersResults && lecturersResult.length === 0">
-                Немає даних про атестацію для вказаного викладача!
-              </div>
-            </div>
-            <div ng-show="getLecturersResults">
-              <div class="lecturers-results">
-                <label for="lecturers-results" class="select-form__label">Оберіть результати</label>
-                <ui-select id="lecturers-results" class="select-form__select_attest"
-                           ng-model="$parent.lecturerResult" append-to-body="true">
-                  <ui-select-match placeholder="Оберіть курс, групу, предмет">
-                    <span ng-bind="createStringForSelect($select.selected)"></span>
-                  </ui-select-match>
-                  <ui-select-choices repeat="item in (lecturersResult | filter: $select.search) track by $index"
-                                     position="down">
-                    <span ng-bind="createStringForSelect(item)"></span>
-                  </ui-select-choices>
-                  <ui-select-no-choice>
-                    Результатів не знайдено
-                  </ui-select-no-choice>
-                </ui-select>
-              </div>
-              <div ng-show="lecturerResult && lecturerResult.attestations.length !== 0" class="table-responsive">
-                <table class="table table-hover table-condensed table-bordered" id="table-attest-lecturer">
-                  <thead class="hidden for-excel">
-                  <tr>
-                    <th class="text-center">Навчальний рік</th>
-                    <th class="text-center">{{studyYears.selected.name}}</th>
-                  </tr>
-                  <tr>
-                    <th class="text-center">Семестр</th>
-                    <th class="text-center">{{studySemesters.selected.name}}</th>
-                  </tr>
-                  <tr>
-                    <th class="text-center">№ Атестації</th>
-                    <th class="text-center">{{studyAttestationPeriod.selected.name}}</th>
-                  </tr>
-                  <tr>
-                    <th class="text-center">Група</th>
-                    <th class="text-center">{{itemGroupLect}}</th>
-                  </tr>
-                  </thead>
-                  <thead>
-                  <tr>
-                    <th class="text-center">№</th>
-                    <th class="text-center">
-                      <a ng-click="setSortOrderType(sortOrderLecturer, 'studentName')"
-                         style="text-decoration: none;">
-                        ПІБ
-                        <span class="fa fa-caret-down" ng-show="isDescendingSort(sortOrderLecturer, 'studentName')"></span>
-                        <span class="fa fa-caret-up" ng-show="isAscendingSort(sortOrderLecturer, 'studentName')"></span>
-                      </a>
-                    </th>
-                    <th class="text-center">
-                      <a ng-click="setSortOrderType(sortOrderLecturer, 'attestationName')"
-                         style="text-decoration: none;">
-                        Результат
-                        <span class="fa fa-caret-down" ng-show="isDescendingSort(sortOrderLecturer, 'attestationName')"></span>
-                        <span class="fa fa-caret-up" ng-show="isAscendingSort(sortOrderLecturer, 'attestationName')"></span>
-                      </a>
-                    </th>
-                  </tr>
-                  </thead>
-                  <tbody>
-                  <tr ng-repeat="stud in lecturerResult.attestations | orderObjectBy:sortOrderLecturer.type:sortOrderLecturer.sortReverse">
-                    <td class="text-center">{{$index + 1}}</td>
-                    <td>{{stud.studentName}}</td>
-                    <td class="text-center">{{stud.attestationName}}</td>
-                  </tr>
-                  </tbody>
-                </table>
-              </div>
-              <div class="text-center" ng-show="lecturerResult.attestations.length !== 0">
-                <a class="btn btn-success" download="attest.xls"
-                   onclick="return ExcellentExport.excel(this, 'table-attest-lecturer', 'attest');">
-                  <i class="fa fa-file-excel-o "></i>Завантажити звіт
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+            <!--<div ng-show="attest.getStudentsResult && attest.attestationResults.length !== 0" class="table-responsive">-->
+              <!--<table class="table table-hover table-condensed table-bordered" id="table-attest-for-student">-->
+                <!--<thead class="hidden for-excel">-->
+                <!--<tr>-->
+                  <!--<th class="text-center">Навчальний рік</th>-->
+                  <!--<th class="text-center">{{studyYears.selected.name}}</th>-->
+                <!--</tr>-->
+                <!--<tr>-->
+                  <!--<th class="text-center">Семестр</th>-->
+                  <!--<th class="text-center">{{studySemesters.selected.name}}</th>-->
+                <!--</tr>-->
+                <!--<tr>-->
+                  <!--<th class="text-center">№ Атестації</th>-->
+                  <!--<th class="text-center">{{studyAttestationPeriod.selected.name}}</th>-->
+                <!--</tr>-->
+                <!--<tr>-->
+                  <!--<th class="text-center">Студент</th>-->
+                  <!--<th class="text-center">{{itemStudent.fullName}}</th>-->
+                <!--</tr>-->
+                <!--</thead>-->
+                <!--<thead>-->
+                <!--<tr>-->
+                  <!--<th class="text-center">№</th>-->
+                  <!--<th class="text-center">-->
+                    <!--<a ng-click="attest.setSortOrderType(attest.sortOrderStudent, 'disciplineName')"-->
+                       <!--style="text-decoration: none;">-->
+                      <!--Назва предмету-->
+                      <!--<span class="fa fa-caret-down" ng-show="attest.isDescendingSort(attest.sortOrderStudent, 'disciplineName')"></span>-->
+                      <!--<span class="fa fa-caret-up" ng-show="attest.isAscendingSort(attest.sortOrderStudent, 'disciplineName')"></span>-->
+                    <!--</a>-->
+                  <!--</th>-->
+                  <!--<th class="text-center">-->
+                    <!--<a ng-click="attest.setSortOrderType(attest.sortOrderStudent, 'lecturer')"-->
+                       <!--style="text-decoration: none;">-->
+                      <!--Результат атестації-->
+                      <!--<span class="fa fa-caret-down" ng-show="attest.isDescendingSort(attest.sortOrderStudent, 'lecturer')"></span>-->
+                      <!--<span class="fa fa-caret-up" ng-show="attest.isAscendingSort(attest.sortOrderStudent, 'lecturer')"></span>-->
+                    <!--</a>-->
+                  <!--</th>-->
+                  <!--<th class="text-center">-->
+                    <!--<a ng-click="attest.setSortOrderType(attest.sortOrderStudent, 'attestation')"-->
+                       <!--style="text-decoration: none;">-->
+                      <!--ПІБ викладача-->
+                      <!--<span class="fa fa-caret-down" ng-show="attest.isDescendingSort(attest.sortOrderStudent, 'attestation')"></span>-->
+                      <!--<span class="fa fa-caret-up" ng-show="attest.isAscendingSort(attest.sortOrderStudent, 'attestation')"></span>-->
+                    <!--</a>-->
+                  <!--</th>-->
+                <!--</tr>-->
+                <!--</thead>-->
+                <!--<tbody>-->
+                <!--<tr ng-repeat="item in attest.attestationResults | orderObjectBy:sortOrderStudent.type:sortOrderStudent.sortReverse">-->
+                  <!--<td class="text-center">{{$index + 1}}</td>-->
+                  <!--<td class="text-center">{{item.disciplineName}}</td>-->
+                  <!--<td class="text-center">{{item.lecturer}}</td>-->
+                  <!--<td class="text-center">{{item.attestation}}</td>-->
+                <!--</tr>-->
+                <!--</tbody>-->
+              <!--</table>-->
+            <!--</div>-->
+            <!--<div class="text-center" ng-show="attest.attestationResults.length !== 0">-->
+              <!--<a class="btn btn-success" download="attest.xls"-->
+                 <!--onclick="return ExcellentExport.excel(this, 'table-attest-for-student', 'attest');">-->
+                <!--<i class="fa fa-file-excel-o "></i> Завантажити звіт-->
+              <!--</a>-->
+            <!--</div>-->
+          <!--</div>-->
+        <!--</div>-->
+        <!--<div class="tab-pane" ng-class="{active: attest.isSet(2)}">-->
+          <!--<div class="col-lg-6 col-lg-offset-3 col-md-6 col-md-offset-3 col-sm-6 col-sm-offset-3 group-select">-->
+            <!--<label for="group-select" class="select-form__label">Навчальна група</label>-->
+            <!--<ui-select id="group-select" ng-keyup="loadGroups($select.search, studyYears.selected.id);"-->
+                       <!--class="select-form__select_attest"-->
+                       <!--ng-model="$parent.itemGroup" append-to-body="true">-->
+              <!--<ui-select-match placeholder="Введіть ім'я групи">-->
+                <!--<span ng-bind="$select.selected.name"></span>-->
+              <!--</ui-select-match>-->
+              <!--<ui-select-choices repeat="groups in (Groups | filter: $select.search) track by groups.id"-->
+                                 <!--position="down">-->
+                <!--<span ng-bind="groups.name"></span>-->
+              <!--</ui-select-choices>-->
+              <!--<ui-select-no-choice>-->
+                <!--Група не знайдена-->
+              <!--</ui-select-no-choice>-->
+            <!--</ui-select>-->
+            <!--<div class="error-load-attest" ng-show="errorMessageGroups">{{errorMessageGroups}}</div>-->
+            <!--<div class="text-center">-->
+              <!--<button class="btn btn-primary btn-result" type="submit" ng-show="itemGroup"-->
+                      <!--ng-click="loadGroupsResult(itemGroup.id, attestationPeriodId);">Переглянути результати-->
+              <!--</button>-->
+            <!--</div>-->
+            <!--<div class="alert alert-info text-center fade in attest-alert"-->
+                 <!--ng-show="getGroupsResults && groupsResult.length === 0">-->
+              <!--Немає даних про атестацію для вказаної групи!-->
+            <!--</div>-->
+          <!--</div>-->
+          <!--<div class="col-md-12">-->
+            <!--<div ng-show="getGroupsResults && groupsResult.length !== 0" class="table-responsive">-->
+              <!--<table class="table table-hover table-condensed table-bordered" id="table-attest-group">-->
+                <!--<thead class="hidden for-excel">-->
+                <!--<tr>-->
+                  <!--<th class="text-center">Навчальний рік</th>-->
+                  <!--<th class="text-center">{{studyYears.selected.name}}</th>-->
+                <!--</tr>-->
+                <!--<tr>-->
+                  <!--<th class="text-center">Семестр</th>-->
+                  <!--<th class="text-center">{{studySemesters.selected.name}}</th>-->
+                <!--</tr>-->
+                <!--<tr>-->
+                  <!--<th class="text-center">№ Атестації</th>-->
+                  <!--<th class="text-center">{{studyAttestationPeriod.selected.name}}</th>-->
+                <!--</tr>-->
+                <!--<tr>-->
+                  <!--<th class="text-center">Група</th>-->
+                  <!--<th class="text-center">{{itemGroup.name}}</th>-->
+                <!--</tr>-->
+                <!--</thead>-->
+                <!--<thead>-->
+                <!--<tr>-->
+                  <!--<th class="text-center">№</th>-->
+                  <!--<th class="text-center">ПІБ</th>-->
+                  <!--<th class="text-center" ng-repeat="disc in disciplinesListForGroups">-->
+                    <!--"{{getDisciplineName(disc.disciplineFullName)}}"-->
+                    <!--<br>-->
+                    <!--{{disc.teacherName}}-->
+                  <!--</th>-->
+                <!--</tr>-->
+                <!--</thead>-->
+                <!--<tbody>-->
+                <!--<tr ng-repeat="stud in studentsList">-->
+                  <!--<td class="text-center">{{$index + 1}}</td>-->
+                  <!--<td>{{stud}}</td>-->
+                  <!--<td class="text-center" ng-repeat="att in (groupsResult | filter: stud)">{{att.attestation.name}}</td>-->
+                <!--</tr>-->
+                <!--</tbody>-->
+              <!--</table>-->
+            <!--</div>-->
+            <!--<div class="text-center" ng-show="groupsResult.length !== 0">-->
+              <!--<a class="btn btn-success" download="attest.xls"-->
+                 <!--onclick="return ExcellentExport.excel(this, 'table-attest-group', 'attest');">-->
+                <!--<i class="fa fa-file-excel-o "></i> Завантажити звіт-->
+              <!--</a>-->
+            <!--</div>-->
+          <!--</div>-->
+        <!--</div>-->
+        <!--<div class="tab-pane" ng-class="{active: attest.isSet(3)}">-->
+          <!--<div class="col-lg-6 col-lg-offset-3 col-md-6 col-md-offset-3 col-sm-6 col-sm-offset-3">-->
+            <!--<div class="lecturers-select">-->
+              <!--<label for="lecturers-select" class="select-form__label">Прізвище Ім'я По-батькові викладача</label>-->
+              <!--<ui-select id="lecturers-select" ng-keyup="loadLecturers($select.search);"-->
+                         <!--class="select-form__select_attest"-->
+                         <!--ng-model="$parent.itemLecturers" append-to-body="true">-->
+                <!--<ui-select-match placeholder="Введіть ПІБ викладача">-->
+                  <!--<span ng-bind="$select.selected.fullName"></span>-->
+                <!--</ui-select-match>-->
+                <!--<ui-select-choices repeat="lecturer in (lecturersList | filter: $select.search) track by lecturer.id"-->
+                                   <!--position="down">-->
+                  <!--<span ng-bind="lecturer.fullName"></span>-->
+                  <!--<span class="lecturer-subdivision-name" ng-bind="lecturer.subdivisionName"></span>-->
+                <!--</ui-select-choices>-->
+                <!--<ui-select-no-choice>-->
+                  <!--Викладача з таким ПІБ не знайдено-->
+                <!--</ui-select-no-choice>-->
+              <!--</ui-select>-->
+              <!--<div class="error-load-attest" ng-show="errorMessageLecturers">{{errorMessageLecturers}}</div>-->
+              <!--<div class="text-center">-->
+                <!--<button class="btn btn-primary btn-result" type="submit" ng-show="itemLecturers"-->
+                        <!--ng-click="loadLecturersResult(itemLecturers.id, attestationPeriodId);">Переглянути результати-->
+                <!--</button>-->
+              <!--</div>-->
+              <!--<div class="alert alert-info text-center fade in attest-alert"-->
+                   <!--ng-show="getLecturersResults && lecturersResult.length === 0">-->
+                <!--Немає даних про атестацію для вказаного викладача!-->
+              <!--</div>-->
+            <!--</div>-->
+            <!--<div ng-show="getLecturersResults">-->
+              <!--<div class="lecturers-results">-->
+                <!--<label for="lecturers-results" class="select-form__label">Оберіть результати</label>-->
+                <!--<ui-select id="lecturers-results" class="select-form__select_attest"-->
+                           <!--ng-model="attest.lecturerResult" append-to-body="true">-->
+                  <!--<ui-select-match placeholder="Оберіть курс, групу, предмет">-->
+                    <!--<span ng-bind="attest.createStringForSelect($select.selected)"></span>-->
+                  <!--</ui-select-match>-->
+                  <!--<ui-select-choices repeat="item in (attest.lecturersResult | filter: $select.search) track by $index"-->
+                                     <!--position="down">-->
+                    <!--<span ng-bind="attest.createStringForSelect(item)"></span>-->
+                  <!--</ui-select-choices>-->
+                  <!--<ui-select-no-choice>-->
+                    <!--Результатів не знайдено-->
+                  <!--</ui-select-no-choice>-->
+                <!--</ui-select>-->
+              <!--</div>-->
+              <!--<div ng-show="attest.lecturerResult && attest.lecturerResult.attestations.length !== 0" class="table-responsive">-->
+                <!--<table class="table table-hover table-condensed table-bordered" id="table-attest-lecturer">-->
+                  <!--<thead class="hidden for-excel">-->
+                  <!--<tr>-->
+                    <!--<th class="text-center">Навчальний рік</th>-->
+                    <!--<th class="text-center">{{studyYears.selected.name}}</th>-->
+                  <!--</tr>-->
+                  <!--<tr>-->
+                    <!--<th class="text-center">Семестр</th>-->
+                    <!--<th class="text-center">{{studySemesters.selected.name}}</th>-->
+                  <!--</tr>-->
+                  <!--<tr>-->
+                    <!--<th class="text-center">№ Атестації</th>-->
+                    <!--<th class="text-center">{{studyAttestationPeriod.selected.name}}</th>-->
+                  <!--</tr>-->
+                  <!--<tr>-->
+                    <!--<th class="text-center">Група</th>-->
+                    <!--<th class="text-center">{{itemGroupLect}}</th>-->
+                  <!--</tr>-->
+                  <!--</thead>-->
+                  <!--<thead>-->
+                  <!--<tr>-->
+                    <!--<th class="text-center">№</th>-->
+                    <!--<th class="text-center">-->
+                      <!--<a ng-click="attest.setSortOrderType(attest.sortOrderLecturer, 'studentName')"-->
+                         <!--style="text-decoration: none;">-->
+                        <!--ПІБ-->
+                        <!--<span class="fa fa-caret-down" ng-show="attest.isDescendingSort(attest.sortOrderLecturer, 'studentName')"></span>-->
+                        <!--<span class="fa fa-caret-up" ng-show="attest.isAscendingSort(attest.sortOrderLecturer, 'studentName')"></span>-->
+                      <!--</a>-->
+                    <!--</th>-->
+                    <!--<th class="text-center">-->
+                      <!--<a ng-click="attest.setSortOrderType(attest.sortOrderLecturer, 'attestationName')"-->
+                         <!--style="text-decoration: none;">-->
+                        <!--Результат-->
+                        <!--<span class="fa fa-caret-down" ng-show="attest.isDescendingSort(attest.sortOrderLecturer, 'attestationName')"></span>-->
+                        <!--<span class="fa fa-caret-up" ng-show="attest.isAscendingSort(attest.sortOrderLecturer, 'attestationName')"></span>-->
+                      <!--</a>-->
+                    <!--</th>-->
+                  <!--</tr>-->
+                  <!--</thead>-->
+                  <!--<tbody>-->
+                  <!--<tr ng-repeat="stud in attest.lecturerResult.attestations | orderObjectBy:sortOrderLecturer.type:sortOrderLecturer.sortReverse">-->
+                    <!--<td class="text-center">{{$index + 1}}</td>-->
+                    <!--<td>{{stud.studentName}}</td>-->
+                    <!--<td class="text-center">{{stud.attestationName}}</td>-->
+                  <!--</tr>-->
+                  <!--</tbody>-->
+                <!--</table>-->
+              <!--</div>-->
+              <!--<div class="text-center" ng-show="attest.lecturerResult.attestations.length !== 0">-->
+                <!--<a class="btn btn-success" download="attest.xls"-->
+                   <!--onclick="return ExcellentExport.excel(this, 'table-attest-lecturer', 'attest');">-->
+                  <!--<i class="fa fa-file-excel-o "></i>Завантажити звіт-->
+                <!--</a>-->
+              <!--</div>-->
+            <!--</div>-->
+          <!--</div>-->
+        <!--</div>-->
+      <!--</div>-->
+    <!--</div>-->
   </div>
 </div>
