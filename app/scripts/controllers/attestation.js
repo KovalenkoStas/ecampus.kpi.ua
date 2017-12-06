@@ -15,35 +15,35 @@
   AttestationCtrl.$inject = ['api'];
   function AttestationCtrl(api) {
     /* jshint validthis: true */
-    var attest = this;
+    var vm = this;
 
-    attest.errorMessageGroups = '';
+    vm.errorMessageGroups = '';
 
     init();
 
     function init() {
       // init attestation params
-      attest.errorMessageYears = '';
-      attest.errorMessageAttests = '';
-      attest.attestationPeriodId = null;
+      vm.errorMessageYears = '';
+      vm.errorMessageAttests = '';
+      vm.attestationPeriodId = null;
       // init students results
-      attest.getStudentsResult = false;
-      attest.studentsResult = [];
+      vm.getStudentsResult = false;
+      vm.studentsResult = [];
       // init groups result
-      attest.getGroupsResults = false;
-      attest.disciplinesListForGroups = [];
-      attest.groupsResult = [];
+      vm.getGroupsResults = false;
+      vm.disciplinesListForGroups = [];
+      vm.groupsResult = [];
       // init lecturers result
-      attest.getLecturersResults = false;
-      attest.groupsListForLecturers = [];
-      attest.coursesListForLecturers = [];
-      attest.disciplinesListForLecturers = [];
+      vm.getLecturersResults = false;
+      vm.groupsListForLecturers = [];
+      vm.coursesListForLecturers = [];
+      vm.disciplinesListForLecturers = [];
       // table sort functionality
-      attest.sortOrderStudent = {
+      vm.sortOrderStudent = {
         type: null,
         sortReverse: null
       };
-      attest.sortOrderLecturer = {
+      vm.sortOrderLecturer = {
         type: null,
         sortReverse: null
       };
@@ -53,20 +53,25 @@
       loadAttestationPeriods();
     }
 
-    attest.errorLoadGroupsResult = '';
-    attest.errorMessageLecturers = '';
-    attest.errorMessageStudents = '';
+    vm.errorLoadGroupsResult = '';
+    vm.errorMessageLecturers = '';
+    vm.errorMessageStudents = '';
 
-    attest.setPill = setPill;
     function setPill(newPill) {
-      attest.pill = newPill;
+      vm.pill = newPill;
+      var firstPill = 1;
+      if (newPill === firstPill) {
+        clearStudentResult();
+      }
     }
 
-    attest.isSet = isSet;
+    vm.isSet = isSet;
 
     function isSet(pillNum) {
-      return attest.pill === pillNum;
+      return vm.pill === pillNum;
     }
+
+    vm.setPill = setPill;
 
     function setCurrentStudyYear(response) {
       for (var i = 0; i < response.length; i++) {
@@ -83,14 +88,14 @@
 
       api.execute(method, url)
         .then(function(response) {
-          attest.studyYears = response;
-          attest.studyYears.selected = setCurrentStudyYear(response);
+          vm.studyYears = response;
+          vm.studyYears.selected = setCurrentStudyYear(response);
         },
         function() {
-          attest.errorMessageYears = (
+          vm.errorMessageYears = (
             'Не вдалося завантажити список навчальних років'
           );
-          attest.studyYears = null;
+          vm.studyYears = null;
         });
     }
 
@@ -119,12 +124,12 @@
     }
 
     function loadSemesters() {
-      attest.studySemesters = [
+      vm.studySemesters = [
         { id: 1, name: 'Перший семестр' },
         { id: 2, name: 'Другий семестр' }
       ];
-      attest.studySemesters.selected = setCurrentStudySemester(
-        attest.studySemesters
+      vm.studySemesters.selected = setCurrentStudySemester(
+        vm.studySemesters
       );
     }
 
@@ -176,20 +181,20 @@
 
       api.execute(method, url)
         .then(function(response) {
-          attest.studyAttestationPeriod = response;
-          attest.studyAttestationPeriod.selected = (
+          vm.studyAttestationPeriod = response;
+          vm.studyAttestationPeriod.selected = (
             setCurrentStudyAttestationPeriod(response)
           );
         },
         function() {
-          attest.errorMessageAttests = (
+          vm.errorMessageAttests = (
             'Не вдалося завантажити список атестацій'
           );
-          attest.attestations = null;
+          vm.attestations = null;
         });
     }
 
-    attest.getDisciplineName = getDisciplineName;
+    vm.getDisciplineName = getDisciplineName;
 
     function getDisciplineName(name) {
       var result = name.split(',');
@@ -220,10 +225,10 @@
       );
     }
 
-    attest.checkAttestationAvailability = function() {
-      var yearId = attest.studyYears.selected.id;
-      var semesterId = attest.studySemesters.selected.id;
-      var periodId = attest.studyAttestationPeriod.selected.id;
+    vm.checkAttestationAvailability = function() {
+      var yearId = vm.studyYears.selected.id;
+      var semesterId = vm.studySemesters.selected.id;
+      var periodId = vm.studyAttestationPeriod.selected.id;
 
       checkAttestationAvailability(yearId, semesterId, periodId);
     };
@@ -238,88 +243,88 @@
         dcLoadId
       );
       var method = 'GET';
-      attest.errorAttestationPeriod = (
+      vm.errorAttestationPeriod = (
         'Немає даних про атестацію для таких параметрів!'
       );
 
       api.execute(method, url)
         .then(function(response) {
           if (response) {
-            attest.attestationPeriodId = +response;
+            vm.attestationPeriodId = +response;
             if (response.data !== undefined) {
               var msg = 'No attestation period with this params';
               if (response.data.message === msg) {
-                attest.attestationPeriodId = -1;
+                vm.attestationPeriodId = -1;
               }
             }
           } else {
-            attest.attestationPeriodId = -1;
+            vm.attestationPeriodId = -1;
           }
         },
         function() {
-          attest.attestationPeriodId = -1;
+          vm.attestationPeriodId = -1;
         });
     }
 
-    attest.loadGroups = function(namePattern, year) {
+    vm.loadGroups = function(namePattern, year) {
       if (namePattern.length > 1) {
         var url = 'Account/group/find/' + namePattern + '/year/' + year;
         // url + namePattern (2 first symbol of group)
         api.execute('GET', url)
           .then(function(response) {
-            attest.errorMessageGroups = '';
-            attest.Groups = response;
+            vm.errorMessageGroups = '';
+            vm.Groups = response;
           },
           function() {
-            attest.errorMessageGroups = 'Не вдалося завантажити список груп';
-            attest.Groups = null;
+            vm.errorMessageGroups = 'Не вдалося завантажити список груп';
+            vm.Groups = null;
           });
       } else {
-        attest.errorMessageGroups = (
+        vm.errorMessageGroups = (
           'Введіть більше 2-х символів для пошуку групи'
         );
       }
     };
 
-    attest.loadGroupsResult = function(rtStudyGroupId, cAttestationPeriodId) {
+    vm.loadGroupsResult = function(rtStudyGroupId, cAttestationPeriodId) {
       var url = (
         'Attestation/group/' + rtStudyGroupId + '/period/' +
         cAttestationPeriodId + '/result'
       );
       api.execute('GET', url)
         .then(function(response) {
-          attest.errorLoadGroupsResult = '';
-          attest.getGroupsResults = true;
+          vm.errorLoadGroupsResult = '';
+          vm.getGroupsResults = true;
         },
         function() {
-          attest.errorLoadGroupsResult = (
+          vm.errorLoadGroupsResult = (
             'Не вдалося завантажити результати для даної групи'
           );
-          attest.groupsResult = null;
+          vm.groupsResult = null;
         });
     };
 
-    attest.loadLecturers = function(namePattern) {
+    vm.loadLecturers = function(namePattern) {
       if (namePattern.length > 2) {
         var url = 'Account/employee/find/' + namePattern;
         // url + namePattern (3 first symbol of group)
         api.execute('GET', url)
           .then(function(response) {
-            attest.errorMessageLecturers = '';
-            attest.lecturersList = response;
+            vm.errorMessageLecturers = '';
+            vm.lecturersList = response;
           },
           function() {
-            attest.errorMessageLecturers = 'Не вдалося завантажити список груп';
-            attest.lecturersList = null;
+            vm.errorMessageLecturers = 'Не вдалося завантажити список груп';
+            vm.lecturersList = null;
           });
       } else {
-        attest.errorMessageLecturers = (
+        vm.errorMessageLecturers = (
           'Введіть більше 3-х символів для пошуку викладача'
         );
       }
     };
 
-    attest.createStringForSelect = createStringForSelect;
+    vm.createStringForSelect = createStringForSelect;
 
     function createStringForSelect(obj) {
       var COURSE = 'курс';
@@ -377,7 +382,7 @@
       return result;
     }
 
-    attest.loadLecturersResult = function(eEmployees1Id, cAttestationPeriodId) {
+    vm.loadLecturersResult = function(eEmployees1Id, cAttestationPeriodId) {
       var url = (
         'Attestation/lecturer/' + eEmployees1Id + '/period/' +
         cAttestationPeriodId + '/result'
@@ -387,38 +392,38 @@
           console.log('loadLecturersResult');
           var sortedResponse = response.sort(sortRuleForLecturersResult);
           console.log(sortedResponse);
-          attest.errorLecturersResult = '';
-          attest.getLecturersResults = true;
-          attest.lecturersResult = transformLecturersAttestations(
+          vm.errorLecturersResult = '';
+          vm.getLecturersResults = true;
+          vm.lecturersResult = transformLecturersAttestations(
             sortedResponse
           );
           console.log(transformLecturersAttestations);
-          console.log(attest.lecturersResult);
+          console.log(vm.lecturersResult);
         },
         function() {
-          attest.errorLecturersResult = (
+          vm.errorLecturersResult = (
             'Не вдалося завантажити результати для даного викладача'
           );
-          attest.lecturersResult = null;
-          attest.getLecturersResults = false;
+          vm.lecturersResult = null;
+          vm.getLecturersResults = false;
         });
     };
 
-    attest.loadStudents = function(namePattern) {
+    vm.loadStudents = function(namePattern) {
       if (namePattern.length > 2) {
         var url = 'Account/student/find/' + namePattern;
         // url + namePattern (3 first symbol of group)
         api.execute('GET', url)
           .then(function(response) {
-            attest.errorMessageStudents = '';
-            attest.students = response;
+            vm.errorMessageStudents = '';
+            vm.students = response;
           },
           function() {
-            attest.errorMessageStudents = 'Не вдалося завантажити список груп';
-            attest.students = null;
+            vm.errorMessageStudents = 'Не вдалося завантажити список груп';
+            vm.students = null;
           });
       } else {
-        attest.errorMessageStudents = (
+        vm.errorMessageStudents = (
           'Введіть більше 3-х символів для пошуку студента'
         );
       }
@@ -440,7 +445,15 @@
       return result;
     }
 
-    attest.loadStudentsResult = function(sPersonalityId, cAttestationPeriodId) {
+    function clearStudentResult() {
+      vm.itemStudent = null;
+      vm.getStudentsResult = false;
+      vm.attestationResults = null;
+    }
+
+    vm.clearStudentResult = clearStudentResult;
+
+    function loadStudentsResult(sPersonalityId, cAttestationPeriodId) {
       var url = (
         'Attestation/student/' + sPersonalityId + '/period/' +
         cAttestationPeriodId + '/result'
@@ -448,15 +461,18 @@
       var method = 'GET';
       api.execute(method, url)
         .then(function(response) {
-          attest.getStudentsResult = true;
-          attest.attestationResults = transformStudentsAttestations(
+          vm.getStudentsResult = true;
+          vm.attestationResults = transformStudentsAttestations(
             response[0].attestations
           );
         },
         function() {
-          attest.studentsResult = null;
+          vm.studentsResult = null;
         });
-    };
+    }
+
+
+    vm.loadStudentsResult = loadStudentsResult;
 
     // sort data in table functions
 
@@ -479,8 +495,8 @@
       return orderBy.type === orderType && !orderBy.sortReverse;
     }
 
-    attest.setSortOrderType = setSortOrderType;
-    attest.isAscendingSort = isAscendingSort;
-    attest.isDescendingSort = isDescendingSort;
+    vm.setSortOrderType = setSortOrderType;
+    vm.isAscendingSort = isAscendingSort;
+    vm.isDescendingSort = isDescendingSort;
   }
 })();
