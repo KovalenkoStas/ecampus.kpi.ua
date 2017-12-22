@@ -39,6 +39,7 @@ module.exports = function(config) {
       'bower_components/angular-ui-tree/dist/angular-ui-tree.js',
       'bower_components/angular-ui-select/dist/select.js',
       'bower_components/angular-xeditable/dist/js/xeditable.js',
+      'bower_components/excellentexport/excellentexport.js',
       'bower_components/angular-mocks/angular-mocks.js',
       // endbower
       'app/scripts/**/*.js',
