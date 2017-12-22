@@ -469,10 +469,21 @@
         function() {
           vm.studentsResult = null;
         });
+      createFileNameForStudent();
     }
 
-
     vm.loadStudentsResult = loadStudentsResult;
+
+    function createFileNameForStudent() {
+      var student = vm.itemStudent;
+      var FILE_TITLE = 'Атестація';
+      var DASH = '-';
+      vm.fileName = FILE_TITLE + DASH + student.group + DASH + student.fullName;
+      // add global window var for onclick function
+      window.fileName = vm.fileName;
+    }
+
+    vm.createFileNameForStudent = createFileNameForStudent;
 
     // sort data in table functions
 
