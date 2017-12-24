@@ -131,19 +131,19 @@
                 <thead class="hidden for-excel">
                 <tr>
                   <th class="text-center">Навчальний рік</th>
-                  <th class="text-center">{{studyYears.selected.name}}</th>
+                  <th class="text-center">{{attest.studyYears.selected.name}}</th>
                 </tr>
                 <tr>
                   <th class="text-center">Семестр</th>
-                  <th class="text-center">{{studySemesters.selected.name}}</th>
+                  <th class="text-center">{{attest.studySemesters.selected.name}}</th>
                 </tr>
                 <tr>
                   <th class="text-center">№ Атестації</th>
-                  <th class="text-center">{{studyAttestationPeriod.selected.name}}</th>
+                  <th class="text-center">{{attest.studyAttestationPeriod.selected.name}}</th>
                 </tr>
                 <tr>
                   <th class="text-center">Студент</th>
-                  <th class="text-center">{{itemStudent.fullName}}</th>
+                  <th class="text-center">{{attest.itemStudent.fullName}}</th>
                 </tr>
                 </thead>
                 <thead>
@@ -176,7 +176,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr ng-repeat="item in attest.attestationResults | orderObjectBy:sortOrderStudent.type:sortOrderStudent.sortReverse">
+                <tr ng-repeat="item in attest.attestationResults | orderObjectBy:attest.sortOrderStudent.type:attest.sortOrderStudent.sortReverse">
                   <td class="text-center">{{$index + 1}}</td>
                   <td class="text-center">{{item.disciplineName}}</td>
                   <td class="text-center">{{item.lecturer}}</td>
