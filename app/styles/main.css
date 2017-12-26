@@ -1019,11 +1019,17 @@ li.list-group-item.blocks-list-item {
   max-height: 400px;
 }
 
-.select-year, .select-semester, .select-attest-num, .student-select,
-.lecturers-select, .group-select, .course-select, .discipline-select,
+.select-year, .select-semester, .lecturers-select,
+.group-select, .course-select, .discipline-select,
 .group-lect-select, .speciality-select, .subdivision-select,
 .faculty-select, .specialization-select, .okr-select {
   margin-bottom: 5px;
+}
+
+.select-attestation-period,
+.student-select,
+.lecturers-results {
+  margin-bottom: 10px;
 }
 
 .attest-menu {
@@ -1076,7 +1082,9 @@ li.list-group-item.blocks-list-item {
   margin: 22px 0 27px 0;
 }
 
-#table-attest-for-student, #table-attest-group {
+#table-attest-for-student,
+#table-attest-group,
+#table-attest-lecturer {
   margin: 5px 0 27px 0;
 }
 

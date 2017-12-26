@@ -28,13 +28,14 @@
       vm.attestationPeriodId = null;
       // init students results
       vm.getStudentsResult = false;
-      vm.studentsResult = [];
+      vm.attestationResults = null;
       // init groups result
       vm.getGroupsResults = false;
       vm.disciplinesListForGroups = [];
       vm.groupsResult = [];
       // init lecturers result
       vm.getLecturersResults = false;
+      vm.lecturersResult = null;
       vm.groupsListForLecturers = [];
       vm.coursesListForLecturers = [];
       vm.disciplinesListForLecturers = [];
@@ -54,7 +55,7 @@
     }
 
     vm.errorLoadGroupsResult = '';
-    vm.errorMessageLecturers = '';
+    vm.errorLecturersResult = '';
     vm.errorMessageStudents = '';
 
     function setPill(newPill) {
@@ -389,16 +390,19 @@
       );
       api.execute('GET', url)
         .then(function(response) {
-          console.log('loadLecturersResult');
-          var sortedResponse = response.sort(sortRuleForLecturersResult);
-          console.log(sortedResponse);
-          vm.errorLecturersResult = '';
-          vm.getLecturersResults = true;
-          vm.lecturersResult = transformLecturersAttestations(
-            sortedResponse
-          );
-          console.log(transformLecturersAttestations);
-          console.log(vm.lecturersResult);
+          if (response.length === 0) {
+            vm.lecturersResult = [];
+            vm.errorLecturersResult = (
+              'Немає даних про атестацію для вказаного викладача!'
+            );
+            vm.getLecturersResults = false;
+          } else {
+            vm.getLecturersResults = true;
+            var sortedResponse = response.sort(sortRuleForLecturersResult);
+            vm.lecturersResult = transformLecturersAttestations(
+              sortedResponse
+            );
+          }
         },
         function() {
           vm.errorLecturersResult = (
@@ -462,14 +466,20 @@
       api.execute(method, url)
         .then(function(response) {
           vm.getStudentsResult = true;
-          vm.attestationResults = transformStudentsAttestations(
-            response[0].attestations
-          );
+          // check if response array not empty
+          if (response.length !== 0) {
+            vm.attestationResults = transformStudentsAttestations(
+              response[0].attestations
+            );
+          } else {
+            vm.attestationResults = [];
+          }
+          createFileNameForStudent();
         },
         function() {
-          vm.studentsResult = null;
+          vm.getStudentsResult = true;
+          vm.attestationResults = null;
         });
-      createFileNameForStudent();
     }
 
     vm.loadStudentsResult = loadStudentsResult;
@@ -478,15 +488,13 @@
       var student = vm.itemStudent;
       var FILE_TITLE = 'Атестація';
       var DASH = '-';
-      vm.fileNameStudent = (
+      vm.fileNameLecturer = (
         FILE_TITLE + DASH +
-        student.group + DASH + student.fullNam
+        student.group + DASH + student.fullName
       );
       // add global window var for onclick function
-      window.fileNameStudent = vm.fileNameStudent;
+      window.fileNameLecturer = vm.fileNameLecturer;
     }
-
-    vm.createFileNameForStudent = createFileNameForStudent;
 
     // sort data in table functions
 
@@ -510,5 +518,61 @@
     vm.setSortOrderType = setSortOrderType;
     vm.isAscendingSort = isAscendingSort;
     vm.isDescendingSort = isDescendingSort;
+
+    function onAttestationPeriodSelect() {
+      vm.checkAttestationAvailability();
+    }
+
+    vm.onAttestationPeriodSelect = onAttestationPeriodSelect;
+
+    function onStudentSelect() {
+      vm.loadStudentsResult(vm.itemStudent.id, vm.attestationPeriodId);
+    }
+
+    vm.onStudentSelect = onStudentSelect;
+
+    function showStudentResult() {
+      if (vm.attestationResults !== null) {
+        return vm.attestationResults.length !== 0;
+      }
+    }
+
+    vm.showStudentResult = showStudentResult;
+
+    function showErrorLoadStudentResult() {
+      if (vm.attestationResults !== null) {
+        if (vm.getStudentsResult) {
+          return vm.attestationResults.length === 0;
+        } else {
+          return false;
+        }
+      } else {
+        return false;
+      }
+    }
+
+    vm.showErrorLoadStudentResult = showErrorLoadStudentResult;
+
+    function onLecturerSelect() {
+      vm.loadLecturersResult(vm.itemLecturers.id, vm.attestationPeriodId);
+    }
+
+    vm.onLecturerSelect = onLecturerSelect;
+
+    function showLecturerResult() {
+      if (vm.lecturersResult !== null) {
+        return vm.lecturersResult.length !== 0;
+      }
+    }
+
+    vm.showLecturerResult = showLecturerResult;
+
+    function createFileNameForLecturer() {
+      vm.fileNameLecturer = createStringForSelect(vm.lecturerResult);
+      // add global window var for onclick function
+      window.fileNameLecturer = vm.fileNameLecturer;
+    }
+
+    vm.createFileNameForLecturer = createFileNameForLecturer;
   }
 })();
