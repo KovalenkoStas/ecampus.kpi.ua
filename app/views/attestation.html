@@ -11,7 +11,9 @@
       <div class="col-lg-6 col-lg-offset-3 col-md-6 col-md-offset-3 col-sm-6 col-sm-offset-3 attestation-params">
         <div class="select-year">
           <label for="year" class="select-form__label">Навчальний рік</label>
-          <ui-select id="year" class="select-form__select_attest" ng-model="attest.studyYears.selected" append-to-body="true">
+          <ui-select id="year" class="select-form__select_attest"
+                     ng-model="attest.studyYears.selected"
+                     append-to-body="true">
             <ui-select-match placeholder="Оберіть навчальний рік">
               <span ng-bind="$select.selected.name"></span>
             </ui-select-match>
@@ -29,7 +31,8 @@
         </div>
         <div class="select-semester" ng-if="attest.studyYears.selected">
           <label for="semester" class="select-form__label">Семестр</label>
-          <ui-select id="semester" class="select-form__select_attest" ng-model="attest.studySemesters.selected"
+          <ui-select id="semester" class="select-form__select_attest"
+                     ng-model="attest.studySemesters.selected"
                      append-to-body="true">
             <ui-select-match placeholder="Оберіть семестр">
               <span ng-bind="$select.selected.name"></span>
@@ -65,11 +68,13 @@
           </div>
         </div>
 
-        <div class="alert alert-danger text-center fade in attest-alert" ng-if="attest.attestationPeriodId === -1">
+        <div class="alert alert-danger text-center fade in attest-alert"
+             ng-if="attest.attestationPeriodId === -1">
           {{ attest.errorAttestationPeriod }}
         </div>
 
-        <div class="attest-menu" ng-if="attest.attestationPeriodId !== null && attest.attestationPeriodId !== -1">
+        <div class="attest-menu"
+             ng-if="attest.attestationPeriodId !== null && attest.attestationPeriodId !== -1">
           <p class="text-center title-type-attest">Оберіть категорію для перегляду атестацій</p>
           <ul class="nav nav-pills-attest nav-justified attest-navigation">
             <li ng-class="{ active: attest.isSet(1)}">
@@ -87,12 +92,14 @@
 
     </div>
     <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-      <div class="tab-content" ng-if="attest.attestationPeriodId !== null && attest.attestationPeriodId !== -1">
+      <div class="tab-content"
+           ng-if="attest.attestationPeriodId !== null && attest.attestationPeriodId !== -1">
         <div class="tab-pane" ng-class="{active: attest.isSet(1)}">
           <div class="col-lg-6 col-lg-offset-3 col-md-6 col-md-offset-3 col-sm-6 col-sm-offset-3">
             <div class="student-select">
               <label for="student-select" class="select-form__label">Прізвище Ім'я По-батькові студента</label>
-              <ui-select class="select-form__select_attest" id="student-select" ng-keyup="attest.loadStudents($select.search)"
+              <ui-select id="student-select" class="select-form__select_attest"
+                         ng-keyup="attest.loadStudents($select.search)"
                          ng-model="attest.itemStudent"
                          on-select="attest.onStudentSelect()"
                          append-to-body="true">
@@ -118,7 +125,7 @@
             </div>
             <div ng-if="attest.showStudentResult()">
               <div class="table-responsive">
-                <table class="table table-hover table-condensed table-bordered" id="table-attest-for-student">
+                <table id="table-attest-for-student" class="table table-hover table-condensed table-bordered">
                   <thead class="hidden for-excel">
                   <tr>
                     <th class="text-center">Навчальний рік</th>
@@ -294,7 +301,7 @@
                 <label for="lecturers-results" class="select-form__label">Оберіть результати</label>
                 <ui-select id="lecturers-results" class="select-form__select_attest"
                            ng-model="attest.lecturerResult"
-                           on-select="attest.createFileNameForLecturer()"
+                           on-select="attest.onLecturerResultSelect()"
                            append-to-body="true">
                   <ui-select-match placeholder="Оберіть курс, групу, предмет">
                     <span ng-bind="attest.createStringForSelect($select.selected)"></span>
@@ -308,68 +315,69 @@
                   </ui-select-no-choice>
                 </ui-select>
               </div>
-              <div class="table-responsive"
-                   ng-if="attest.lecturersResult && attest.lecturersResult.attestations.length !== 0">
-                <table class="table table-hover table-condensed table-bordered" id="table-attest-lecturer">
-                  <thead class="hidden for-excel">
-                  <tr>
-                    <th class="text-center">Навчальний рік</th>
-                    <th class="text-center">{{attest.studyYears.selected.name}}</th>
-                  </tr>
-                  <tr>
-                    <th class="text-center">Семестр</th>
-                    <th class="text-center">{{attest.studySemesters.selected.name}}</th>
-                  </tr>
-                  <tr>
-                    <th class="text-center">№ Атестації</th>
-                    <th class="text-center">{{attest.studyAttestationPeriod.selected.name}}</th>
-                  </tr>
-                  <tr>
-                    <th class="text-center">Група</th>
-                    <th class="text-center">{{attest.itemGroupLect}}</th>
-                  </tr>
-                  </thead>
-                  <thead>
-                  <tr>
-                    <th class="text-center">№</th>
-                    <th class="text-center">
-                      <a ng-click="attest.setSortOrderType(attest.sortOrderLecturer, 'studentName')"
-                         style="text-decoration: none;">
-                        ПІБ
-                        <span class="fa fa-caret-down"
-                              ng-show="attest.isDescendingSort(attest.sortOrderLecturer, 'studentName')"></span>
-                        <span class="fa fa-caret-up"
-                              ng-show="attest.isAscendingSort(attest.sortOrderLecturer, 'studentName')"></span>
-                      </a>
-                    </th>
-                    <th class="text-center">
-                      <a ng-click="attest.setSortOrderType(attest.sortOrderLecturer, 'attestationName')"
-                         style="text-decoration: none;">
-                        Результат
-                        <span class="fa fa-caret-down"
-                              ng-show="attest.isDescendingSort(attest.sortOrderLecturer, 'attestationName')"></span>
-                        <span class="fa fa-caret-up"
-                              ng-show="attest.isAscendingSort(attest.sortOrderLecturer, 'attestationName')"></span>
-                      </a>
-                    </th>
-                  </tr>
-                  </thead>
-                  <tbody>
-                  <tr
-                    ng-repeat="stud in attest.lecturerResult.attestations | orderObjectBy:sortOrderLecturer.type:sortOrderLecturer.sortReverse">
-                    <td class="text-center">{{$index + 1}}</td>
-                    <td>{{stud.studentName}}</td>
-                    <td class="text-center">{{stud.attestationName}}</td>
-                  </tr>
-                  </tbody>
-                </table>
-              </div>
-              <div class="text-center" ng-if="attest.lecturersResult.attestations.length !== 0">
-                <a class="btn btn-success" download="{{attest.fileNameLecturer + '.xls'}}"
-                   onclick="return ExcellentExport.excel(this, 'table-attest-lecturer', fileNameLecturer)">
-                  <i class="fa fa-file-excel-o"></i>
-                  Завантажити звіт
-                </a>
+              <div ng-if="attest.showResult()">
+                <div class="table-responsive">
+                  <table id="table-attest-lecturer" class="table table-hover table-condensed table-bordered">
+                    <thead class="hidden for-excel">
+                    <tr>
+                      <th class="text-center">Навчальний рік</th>
+                      <th class="text-center">{{attest.studyYears.selected.name}}</th>
+                    </tr>
+                    <tr>
+                      <th class="text-center">Семестр</th>
+                      <th class="text-center">{{attest.studySemesters.selected.name}}</th>
+                    </tr>
+                    <tr>
+                      <th class="text-center">№ Атестації</th>
+                      <th class="text-center">{{attest.studyAttestationPeriod.selected.name}}</th>
+                    </tr>
+                    <tr>
+                      <th class="text-center">Група</th>
+                      <th class="text-center">{{attest.lecturerResult.studyGroup}}</th>
+                    </tr>
+                    </thead>
+                    <thead>
+                    <tr>
+                      <th class="text-center">№</th>
+                      <th class="text-center">
+                        <a ng-click="attest.setSortOrderType(attest.sortOrderLecturer, 'studentName')"
+                           style="text-decoration: none;">
+                          ПІБ
+                          <span class="fa fa-caret-down"
+                                ng-show="attest.isDescendingSort(attest.sortOrderLecturer, 'studentName')"></span>
+                          <span class="fa fa-caret-up"
+                                ng-show="attest.isAscendingSort(attest.sortOrderLecturer, 'studentName')"></span>
+                        </a>
+                      </th>
+                      <th class="text-center">
+                        <a ng-click="attest.setSortOrderType(attest.sortOrderLecturer, 'attestationName')"
+                           style="text-decoration: none;">
+                          Результат
+                          <span class="fa fa-caret-down"
+                                ng-show="attest.isDescendingSort(attest.sortOrderLecturer, 'attestationName')"></span>
+                          <span class="fa fa-caret-up"
+                                ng-show="attest.isAscendingSort(attest.sortOrderLecturer, 'attestationName')"></span>
+                        </a>
+                      </th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr
+                      ng-repeat="stud in attest.lecturerResult.attestations | orderObjectBy:attest.sortOrderLecturer.type:attest.sortOrderLecturer.sortReverse">
+                      <td class="text-center">{{$index + 1}}</td>
+                      <td>{{stud.studentName}}</td>
+                      <td class="text-center">{{stud.attestationName}}</td>
+                    </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="text-center" ng-if="attest.showLecturerResult()">
+                  <a class="btn btn-success" download="{{attest.fileNameLecturer + '.xls'}}"
+                     onclick="return ExcellentExport.excel(this, 'table-attest-lecturer', fileNameLecturer)">
+                    <i class="fa fa-file-excel-o"></i>
+                    Завантажити звіт
+                  </a>
+                </div>
               </div>
             </div>
           </div>

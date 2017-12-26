@@ -402,6 +402,7 @@
             vm.lecturersResult = transformLecturersAttestations(
               sortedResponse
             );
+            vm.lecturerResult = null;
           }
         },
         function() {
@@ -573,6 +574,18 @@
       window.fileNameLecturer = vm.fileNameLecturer;
     }
 
-    vm.createFileNameForLecturer = createFileNameForLecturer;
+    function onLecturerResultSelect() {
+      createFileNameForLecturer();
+    }
+
+    vm.onLecturerResultSelect = onLecturerResultSelect;
+
+    function showResult() {
+      if (vm.lecturerResult !== null) {
+        return vm.lecturerResult.length !== 0;
+      }
+    }
+
+    vm.showResult = showResult;
   }
 })();
