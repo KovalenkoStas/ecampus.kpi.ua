@@ -186,10 +186,10 @@
               </table>
             </div>
 
-            <div class="text-center" ng-show="attest.attestationResults.length !== 0">
-              <a class="btn btn-success" download="{{attest.fileName + '.xls'}}"
-                 onclick="return ExcellentExport.excel(this, 'table-attest-for-student', fileName)">
-                <i class="fa fa-file-excel-o "></i> Завантажити звіт
+            <div class="text-center" ng-if="attest.attestationResults !== null">
+              <a class="btn btn-success" download="{{attest.fileNameStudent + '.xls'}}"
+                 onclick="return ExcellentExport.excel(this, 'table-attest-for-student', fileNameStudent)">
+                <i class="fa fa-file-excel-o"></i> Завантажити звіт
               </a>
             </div>
           </div>

@@ -478,16 +478,17 @@
       var student = vm.itemStudent;
       var FILE_TITLE = 'Атестація';
       var DASH = '-';
-      vm.fileName = FILE_TITLE + DASH + student.group + DASH + student.fullName;
+      vm.fileNameStudent = (
+        FILE_TITLE + DASH +
+        student.group + DASH + student.fullNam
+      );
       // add global window var for onclick function
-      window.fileName = vm.fileName;
+      window.fileNameStudent = vm.fileNameStudent;
     }
 
     vm.createFileNameForStudent = createFileNameForStudent;
 
     // sort data in table functions
-
-    // init value TODO add to global cntrl init function
 
     function changeSortOrder(orderBy) {
       orderBy.sortReverse = !orderBy.sortReverse;
