@@ -305,6 +305,13 @@
         });
     };
 
+    function sortRuleLecturers(a, b) {
+      var name1 = a.fullName;
+      var name2 = b.fullName;
+
+      return name1.localeCompare(name2);
+    }
+
     vm.loadLecturers = function(namePattern) {
       if (namePattern.length > 2) {
         var url = 'Account/employee/find/' + namePattern;
@@ -312,7 +319,7 @@
         api.execute('GET', url)
           .then(function(response) {
             vm.errorMessageLecturers = '';
-            vm.lecturersList = response;
+            vm.lecturersList = response.sort(sortRuleLecturers);
           },
           function() {
             vm.errorMessageLecturers = 'Не вдалося завантажити список груп';
